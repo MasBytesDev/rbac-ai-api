@@ -33,7 +33,7 @@ public class AppUserRole extends BaseEntity {
     @JoinColumn(name = "app_user_id", nullable = false)
     private AppUser appUser;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "role_id", nullable = false)
     private Role role;
 

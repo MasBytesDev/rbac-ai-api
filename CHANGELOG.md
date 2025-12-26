@@ -43,3 +43,18 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 ### Notes
 - This release completes the integration of **role-based authorization**.
 - Database cleanup and formal dataset seeding will follow to ensure consistent test users and roles.
+
+## [v2.2] - 2025-12-26
+### Added
+- Created `AdminController` under `shared.infrastructure.rest` with `/api/v1/admin/test` endpoint.
+- Created `UserController` under `shared.infrastructure.rest` with `/api/v1/user/test` endpoint.
+- Created `AuthController` under `shared.infrastructure.rest` with `/api/v1/auth/status` endpoint to expose session state and authorities.
+
+### Fixed
+- Corrected `AppUserDetails` authority mapping to avoid duplicate `ROLE_` prefix.
+
+### Notes
+- This release validates the complete **authentication and authorization flow**:
+  - Admin can access both `/admin/test` and `/user/test`.
+  - User can only access `/user/test` and is forbidden from `/admin/test`.
+- Endpoints now provide clear JSON responses for testing and demonstration purposes.

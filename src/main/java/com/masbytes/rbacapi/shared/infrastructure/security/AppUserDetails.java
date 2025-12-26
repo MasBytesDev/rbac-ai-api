@@ -25,7 +25,7 @@ public class AppUserDetails implements UserDetails {
         }
 
         return user.getRoles().stream()
-                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getRoleName()))
+                .map(role -> new SimpleGrantedAuthority(role.getRoleName()))
                 .collect(Collectors.toSet());
     }
 

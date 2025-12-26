@@ -1,14 +1,18 @@
 package com.masbytes.rbacapi.shared.infrastructure.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.masbytes.rbacapi.shared.infrastructure.security.AppUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+
+import jakarta.servlet.http.HttpServletResponse;
+import java.util.Map;
 
 @Configuration
 @EnableWebSecurity
@@ -23,25 +27,57 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(AbstractHttpConfigurer::disable) // APIs REST, sin formularios HTML tradicionales
-                .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/v1/auth/**").permitAll() // login/logout públicos
-                .requestMatchers("/public/**").permitAll() // otros endpoints públicos
-                .requestMatchers("/api/v1/admin/**").hasRole("ADMIN") // solo ROLE_ADMIN
-                .requestMatchers("/api/v1/user/**").hasAnyRole("USER", "ADMIN") // USER o ADMIN
-                .anyRequest().authenticated() // el resto requiere sesión
-                )
-                .formLogin(form -> form
-                .loginProcessingUrl("/api/v1/auth/login") // intercepta Spring Security
+            // APIs REST no necesitan CSRF
+            .csrf(AbstractHttpConfigurer::disable)
+
+            // Autorización de endpoints
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/api/v1/auth/**").permitAll()   // login/logout públicos
+                .requestMatchers("/public/**").permitAll()        // otros endpoints públicos
+                .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                .requestMatchers("/api/v1/user/**").hasAnyRole("USER", "ADMIN")
+                .anyRequest().authenticated()
+            )
+
+            // Configuración de login
+            .formLogin(form -> form
+                .loginProcessingUrl("/api/v1/auth/login")
+                .usernameParameter("email")
+                .passwordParameter("password")
+                .successHandler((request, response, authentication) -> {
+                    response.setContentType("application/json");
+                    var result = Map.of(
+                        "message", "Login successful",
+                        "user", authentication.getName()
+                    );
+                    new ObjectMapper().writeValue(response.getWriter(), result);
+                })
+                .failureHandler((request, response, exception) -> {
+                    response.setContentType("application/json");
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    var result = Map.of(
+                        "error", "Invalid credentials"
+                    );
+                    new ObjectMapper().writeValue(response.getWriter(), result);
+                })
                 .permitAll()
-                )
-                .logout(logout -> logout
+            )
+
+            // Configuración de logout
+            .logout(logout -> logout
                 .logoutUrl("/api/v1/auth/logout")
-                .invalidateHttpSession(true)
-                .deleteCookies("JSESSIONID")
-                .permitAll()
-                )
-                .userDetailsService(userDetailsService); // integra nuestro servicio de usuarios
+                .logoutSuccessHandler((request, response, authentication) -> {
+                    response.setContentType("application/json");
+                    var result = Map.of(
+                        "message", "Logout successful"
+                    );
+                    new ObjectMapper().writeValue(response.getWriter(), result);
+                })
+            )
+
+            // Integración con tu servicio de usuarios
+            .userDetailsService(userDetailsService);
+
         return http.build();
     }
 

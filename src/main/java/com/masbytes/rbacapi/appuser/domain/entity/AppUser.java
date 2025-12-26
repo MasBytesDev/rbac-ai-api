@@ -5,6 +5,7 @@ import com.masbytes.rbacapi.role.domain.entity.Role;
 import com.masbytes.rbacapi.shared.domain.auditable.BaseEntity;
 import com.masbytes.rbacapi.shared.domain.enums.Status;
 import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -53,8 +54,9 @@ public class AppUser extends BaseEntity {
     @Column(name = "app_user_status", nullable = false, length = 50)
     private Status appUserStatus;
 
-    @OneToMany(mappedBy = "appUser", fetch = FetchType.LAZY, orphanRemoval = true)
-    private Set<AppUserRole> appUserRoles = new HashSet<>();
+    @OneToMany(mappedBy = "appUser", fetch = FetchType.EAGER,
+            cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<AppUserRole> appUserRoles;
 
     /**
      * Lifecycle hook executed before persisting the entity. Ensures that the
