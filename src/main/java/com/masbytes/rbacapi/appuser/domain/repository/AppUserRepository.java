@@ -6,6 +6,8 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 /**
  * Repository interface for managing AppUser entities.
@@ -39,5 +41,11 @@ public interface AppUserRepository extends JpaRepository<AppUser, Long> {
      * @return true if the email exists, false otherwise
      */
     boolean existsByEmail(String email);
+
+    @Query("SELECT u FROM AppUser u "
+            + "JOIN FETCH u.appUserRoles aur "
+            + "JOIN FETCH aur.role "
+            + "WHERE u.email = :email")
+    Optional<AppUser> findByEmailWithRoles(@Param("email") String email);
 
 }
