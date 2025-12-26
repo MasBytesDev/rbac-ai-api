@@ -27,6 +27,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/v1/auth/**").permitAll() // login/logout públicos
                 .requestMatchers("/public/**").permitAll() // otros endpoints públicos
+                .requestMatchers("/api/v1/admin/**").hasRole("ADMIN") // solo ROLE_ADMIN
+                .requestMatchers("/api/v1/user/**").hasAnyRole("USER", "ADMIN") // USER o ADMIN
                 .anyRequest().authenticated() // el resto requiere sesión
                 )
                 .formLogin(form -> form

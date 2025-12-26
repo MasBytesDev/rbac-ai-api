@@ -31,3 +31,15 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 ### Notes
 - This release introduces **session-based authentication** instead of JWT, aligned with project goals.
 - Future iterations will expand role/permission mapping into `GrantedAuthority` for fine-grained authorization.
+
+## [v2.1] - 2025-12-26
+### Added
+- Extended `AppUser` entity to expose assigned roles via `AppUserRole` relationship.
+- Updated `AppUserDetails` to map roles into `GrantedAuthority` using `SimpleGrantedAuthority`.
+- Enhanced `SecurityConfig` with role-based access rules:
+  - `/api/v1/admin/**` restricted to `ROLE_ADMIN`.
+  - `/api/v1/user/**` accessible to `ROLE_USER` and `ROLE_ADMIN`.
+
+### Notes
+- This release completes the integration of **role-based authorization**.
+- Database cleanup and formal dataset seeding will follow to ensure consistent test users and roles.
