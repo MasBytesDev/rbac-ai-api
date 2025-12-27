@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -32,6 +33,9 @@ public interface AppUserRepository extends JpaRepository<AppUser, Long> {
      * @param email the email address of the user
      * @return an Optional containing the user if found, or empty if not
      */
+    @EntityGraph(attributePaths = {
+        "appUserRoles.role.rolePermissions.permission"
+    })
     Optional<AppUser> findByEmail(String email);
 
     /**
@@ -46,6 +50,6 @@ public interface AppUserRepository extends JpaRepository<AppUser, Long> {
             + "JOIN FETCH u.appUserRoles aur "
             + "JOIN FETCH aur.role "
             + "WHERE u.email = :email")
-    Optional<AppUser> findByEmailWithRoles(@Param("email") String email);
+    Optional<AppUser> findByEmailWithRoles(@Param("email") String email);   
 
 }

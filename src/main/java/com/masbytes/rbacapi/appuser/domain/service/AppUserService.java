@@ -6,6 +6,7 @@ import com.masbytes.rbacapi.appuser.domain.entity.AppUser;
 import com.masbytes.rbacapi.appuser.domain.exception.AppUserNotFoundException;
 import com.masbytes.rbacapi.appuser.domain.exception.EmailAlreadyExistsException;
 import com.masbytes.rbacapi.appuser.domain.repository.AppUserRepository;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -62,6 +63,19 @@ public class AppUserService {
         return repository.findByPublicId(publicId)
                 .map(mapper::toResponse)
                 .orElseThrow(() -> new AppUserNotFoundException(publicId));
+    }
+
+    /**
+     * Retrieves all users in the system.
+     *
+     * @return list of users as response DTOs
+     */
+    @Transactional(readOnly = true)
+    public List<AppUserResponse> getAllUsers() {
+        return repository.findAll()
+                .stream()
+                .map(mapper::toResponse)
+                .toList();
     }
 
     /**

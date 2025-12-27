@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 /**
  * REST controller for managing roles. Provides endpoints to create, retrieve,
@@ -28,6 +29,7 @@ public class RoleController {
      * @return ResponseEntity with the created role and HTTP 201 status
      */
     @PostMapping
+    @PreAuthorize("hasAuthority('ROLE_MANAGE')")
     public ResponseEntity<RoleResponse> createRole(@Valid @RequestBody CreateRoleRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(roleService.createRole(request));
     }
@@ -39,6 +41,7 @@ public class RoleController {
      * @return ResponseEntity with the role and HTTP 200 status
      */
     @GetMapping("/{publicId}")
+    @PreAuthorize("hasAuthority('ROLE_MANAGE')")
     public ResponseEntity<RoleResponse> getByPublicId(@PathVariable UUID publicId) {
         return ResponseEntity.ok(roleService.getRoleByPublicId(publicId));
     }
@@ -52,6 +55,7 @@ public class RoleController {
      * @throws IllegalArgumentException if the description is invalid
      */
     @PatchMapping("/{publicId}/description")
+    @PreAuthorize("hasAuthority('ROLE_MANAGE')")
     public ResponseEntity<RoleResponse> updateDescription(
             @PathVariable UUID publicId,
             @Valid @RequestBody UpdateRoleDescriptionRequest request) {
@@ -66,6 +70,7 @@ public class RoleController {
      * @return ResponseEntity with the updated role and HTTP 200 status
      */
     @PatchMapping("/{publicId}/status")
+    @PreAuthorize("hasAuthority('ROLE_MANAGE')")
     public ResponseEntity<RoleResponse> changeStatus(
             @PathVariable UUID publicId,
             @Valid @RequestBody ChangeRoleStatusRequest request) {

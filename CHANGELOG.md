@@ -58,3 +58,22 @@ This project adheres to [Semantic Versioning](https://semver.org/).
   - Admin can access both `/admin/test` and `/user/test`.
   - User can only access `/user/test` and is forbidden from `/admin/test`.
 - Endpoints now provide clear JSON responses for testing and demonstration purposes.
+
+## [v3.0] - 2025-12-27
+###Added
+- Full implementation of a functional and didactic RBAC flow with three user profiles: Regular User, Admin User, and Root User.
+- POST /api/v1/app-users endpoint validated for user creation with initial PENDING status.
+- PATCH /api/v1/app-users/{publicId}/status endpoint to promote users (PENDING → ACTIVE).
+- POST /api/v1/app-users/roles endpoint to dynamically assign roles via AppUserRoleController.
+- Permission validation based on roles (ROLE_ADMIN, ROLE_USER) and authorities (USER_READ, USER_WRITE, ROLE_MANAGE).
+- Exhaustive testing in Bruno for each profile, including login, logout, endpoint access, and semantic error handling (403, 401, 409, 405).
+
+### Fixed
+- Replaced generic 500 Internal Server Error responses with proper 403 Forbidden for unauthorized access.
+- Enforced ACTIVE status as a prerequisite for login.
+- Correct mapping of roles and authorities in AppUserDetails.
+
+### Notes
+- This release consolidates the system as a realistic platform, with complete authentication, authorization, role management, and reproducible testing flows.
+- The Root User (root@masbytes.com) behaves as a superuser with full access to all endpoints.
+- The system is ready for collaborative contributions via Pull Requests.

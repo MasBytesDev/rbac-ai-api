@@ -1,14 +1,19 @@
 package com.masbytes.rbacapi.role.domain.entity;
 
+import com.masbytes.rbacapi.rolepermission.domain.entity.RolePermission;
 import com.masbytes.rbacapi.shared.domain.auditable.BaseEntity;
 import com.masbytes.rbacapi.shared.domain.enums.Status;
 import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
+import java.util.Set;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -38,6 +43,9 @@ public class Role extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "role_status", nullable = false, length = 50)
     private Status roleStatus;
+
+    @OneToMany(mappedBy = "role", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<RolePermission> rolePermissions;
 
     /**
      * Initializes the role status before persisting. Defaults to Status.PENDING

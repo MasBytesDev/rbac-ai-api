@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 /**
  * REST controller for managing role assignments of application users. Provides
@@ -31,6 +32,7 @@ public class AppUserRoleController {
      * status
      */
     @PostMapping("/roles")
+    @PreAuthorize("hasAuthority('ROLE_MANAGE')")
     public ResponseEntity<AppUserRoleResponse> assignRole(
             @Valid @RequestBody AssignRoleRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -46,6 +48,7 @@ public class AppUserRoleController {
      * status
      */
     @PatchMapping("/{userPublicId}/roles")
+    @PreAuthorize("hasAuthority('ROLE_MANAGE')")
     public ResponseEntity<AppUserRoleResponse> updateRole(
             @PathVariable UUID userPublicId,
             @Valid @RequestBody UpdateUserRoleRequest request) {
@@ -59,6 +62,7 @@ public class AppUserRoleController {
      * @param rolePublicId the public UUID of the role
      */
     @DeleteMapping("/{userPublicId}/roles/{rolePublicId}")
+    @PreAuthorize("hasAuthority('ROLE_MANAGE')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void revokeRole(
             @PathVariable UUID userPublicId,

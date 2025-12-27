@@ -13,6 +13,9 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -97,6 +100,48 @@ public class GlobalExceptionHandler {
                 .map(error -> error.getField() + ": " + error.getDefaultMessage())
                 .collect(Collectors.joining(", "));
         return buildResponse(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR", message, request);
+    }
+
+    /**
+     * Handles AccessDeniedException. Logs the forbidden access and returns a
+     * 403 Forbidden response.
+     * 
+     * @param ex
+     * @param request
+     * @return 
+     */
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAccessDenied(AccessDeniedException ex, HttpServletRequest request) {
+        log.warn("Access denied at path {}: {}", request.getRequestURI(), ex.getMessage());
+        return buildResponse(HttpStatus.FORBIDDEN, "FORBIDDEN", "You do not have permission to access this resource", request);
+    }
+
+    /**
+     * Handles AuthenticationException. Logs the unauthorized attempt and
+     * returns a 401 Unauthorized response.
+     * 
+     * @param ex
+     * @param request
+     * @return 
+     */
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ErrorResponse> handleAuthentication(AuthenticationException ex, HttpServletRequest request) {
+        log.warn("Authentication failed at path {}: {}", request.getRequestURI(), ex.getMessage());
+        return buildResponse(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED", "Authentication failed: " + ex.getMessage(), request);
+    }
+
+    /**
+     * Handles HttpRequestMethodNotSupportedException. Logs the invalid method
+     * and returns a 405 Method Not Allowed response.
+     * 
+     * @param ex
+     * @param request
+     * @return 
+     */
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ErrorResponse> handleMethodNotSupported(HttpRequestMethodNotSupportedException ex, HttpServletRequest request) {
+        log.warn("Method not supported at path {}: {}", request.getRequestURI(), ex.getMessage());
+        return buildResponse(HttpStatus.METHOD_NOT_ALLOWED, "METHOD_NOT_ALLOWED", "Request method '" + ex.getMethod() + "' not supported for this endpoint", request);
     }
 
     /**

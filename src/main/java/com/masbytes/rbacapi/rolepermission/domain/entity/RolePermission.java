@@ -34,7 +34,7 @@ public class RolePermission extends BaseEntity {
      * The role associated with this permission assignment. Mapped as a
      * many-to-one relationship.
      */
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "role_id", nullable = false)
     private Role role;
 
@@ -42,7 +42,7 @@ public class RolePermission extends BaseEntity {
      * The permission associated with this role assignment. Mapped as a
      * many-to-one relationship.
      */
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "permission_id", nullable = false)
     private Permission permission;
 

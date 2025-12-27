@@ -13,9 +13,14 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.Map;
+import org.springframework.security.authentication.AuthenticationManager;
+//  import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
     private final AppUserDetailsService userDetailsService;
@@ -27,56 +32,41 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            // APIs REST no necesitan CSRF
-            .csrf(AbstractHttpConfigurer::disable)
-
-            // Autorización de endpoints
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/v1/auth/**").permitAll()   // login/logout públicos
-                .requestMatchers("/public/**").permitAll()        // otros endpoints públicos
-                .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
-                .requestMatchers("/api/v1/user/**").hasAnyRole("USER", "ADMIN")
+                .csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/api/v1/auth/**").permitAll()
+                .requestMatchers("/public/**").permitAll()
                 .anyRequest().authenticated()
-            )
-
-            // Configuración de login
-            .formLogin(form -> form
+                )
+                .formLogin(form -> form
                 .loginProcessingUrl("/api/v1/auth/login")
                 .usernameParameter("email")
                 .passwordParameter("password")
                 .successHandler((request, response, authentication) -> {
                     response.setContentType("application/json");
                     var result = Map.of(
-                        "message", "Login successful",
-                        "user", authentication.getName()
+                            "message", "Login successful",
+                            "user", authentication.getName()
                     );
                     new ObjectMapper().writeValue(response.getWriter(), result);
                 })
                 .failureHandler((request, response, exception) -> {
                     response.setContentType("application/json");
                     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                    var result = Map.of(
-                        "error", "Invalid credentials"
-                    );
+                    var result = Map.of("error", "Invalid credentials");
                     new ObjectMapper().writeValue(response.getWriter(), result);
                 })
                 .permitAll()
-            )
-
-            // Configuración de logout
-            .logout(logout -> logout
+                )
+                .logout(logout -> logout
                 .logoutUrl("/api/v1/auth/logout")
                 .logoutSuccessHandler((request, response, authentication) -> {
                     response.setContentType("application/json");
-                    var result = Map.of(
-                        "message", "Logout successful"
-                    );
+                    var result = Map.of("message", "Logout successful");
                     new ObjectMapper().writeValue(response.getWriter(), result);
                 })
-            )
-
-            // Integración con tu servicio de usuarios
-            .userDetailsService(userDetailsService);
+                )
+                .userDetailsService(userDetailsService);
 
         return http.build();
     }
@@ -84,5 +74,11 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    //  Forma moderna de exponer AuthenticationManager
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
     }
 }

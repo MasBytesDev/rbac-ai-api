@@ -1,13 +1,16 @@
 package com.masbytes.rbacapi.shared.infrastructure.security;
 
 import com.masbytes.rbacapi.appuser.domain.entity.AppUser;
+import com.masbytes.rbacapi.role.domain.entity.Role;
 import com.masbytes.rbacapi.shared.domain.enums.Status;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
-import java.util.Collections;
-import java.util.stream.Collectors;
+//  import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+//  import java.util.stream.Collectors;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 public class AppUserDetails implements UserDetails {
@@ -20,13 +23,21 @@ public class AppUserDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        if (user.getRoles() == null || user.getRoles().isEmpty()) {
-            return Collections.emptyList();
+        Set<GrantedAuthority> authorities = new HashSet<>();
+
+        for (Role role : user.getRoles()) {
+            // Rol
+            authorities.add(new SimpleGrantedAuthority(role.getRoleName()));
+
+            // Permisos del rol
+            if (role.getRolePermissions() != null) {
+                role.getRolePermissions().forEach(rp
+                        -> authorities.add(new SimpleGrantedAuthority(rp.getPermission().getPermissionName()))
+                );
+            }
         }
 
-        return user.getRoles().stream()
-                .map(role -> new SimpleGrantedAuthority(role.getRoleName()))
-                .collect(Collectors.toSet());
+        return authorities;
     }
 
     @Override

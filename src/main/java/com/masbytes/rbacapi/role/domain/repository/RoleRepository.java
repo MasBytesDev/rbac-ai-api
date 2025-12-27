@@ -1,9 +1,13 @@
 package com.masbytes.rbacapi.role.domain.repository;
 
+import com.masbytes.rbacapi.permission.domain.entity.Permission;
 import com.masbytes.rbacapi.role.domain.entity.Role;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -37,5 +41,8 @@ public interface RoleRepository extends JpaRepository<Role, Long> {
      * @return true if a role with the name exists, false otherwise
      */
     boolean existsByRoleName(String roleName);
+
+    @Query("SELECT p FROM RolePermission rp JOIN rp.permission p WHERE rp.role = :role")
+    Set<Permission> findPermissionsByRole(@Param("role") Role role);
 
 }

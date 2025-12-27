@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 /**
  * REST controller for managing role-permission associations. Provides endpoints
@@ -32,6 +33,7 @@ public class RolePermissionController {
      * HTTP 201 status
      */
     @PostMapping
+    @PreAuthorize("hasAuthority('ROLE_MANAGE')")
     public ResponseEntity<RolePermissionResponse> assignPermission(
             @Valid @RequestBody AssignPermissionRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.assignPermissionToRole(request));
@@ -45,6 +47,7 @@ public class RolePermissionController {
      * status
      */
     @GetMapping("/roles/{rolePublicId}")
+    @PreAuthorize("hasAuthority('ROLE_MANAGE')")
     public ResponseEntity<RoleWithPermissionsResponse> getRoleWithPermissions(
             @PathVariable UUID rolePublicId) {
         return ResponseEntity.ok(service.getRoleWithPermissions(rolePublicId));
@@ -59,6 +62,7 @@ public class RolePermissionController {
      * successfully deleted
      */
     @DeleteMapping("/roles/{rolePublicId}/permissions/{permissionPublicId}")
+    @PreAuthorize("hasAuthority('ROLE_MANAGE')")
     public ResponseEntity<Void> revokePermission(
             @PathVariable UUID rolePublicId,
             @PathVariable UUID permissionPublicId) {
